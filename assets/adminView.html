@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Directory</title>
+  <style>
+    body {
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #1e1e1e;
+    }
+
+    header {
+      background-color: #103060;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      border-bottom: 2px solid #103060;
+      padding-bottom: 0.5rem;
+    }
+
+    .directory li {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background-color: #f4f4f9;
+        margin: 0.25rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s;
+        font-size: 0.875rem;
+        }
+
+        .directory li:hover {
+        background-color: #e2e2e2;
+        transform: scale(1.05);
+        }
+
+        .directory {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0;
+        list-style-type: none;
+        }
+
+
+    .panel {
+      display: none;
+      padding: 1rem;
+      background-color: #f4f4f9;
+      border-radius: 4px;
+      margin-top: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .group {
+      margin-top: 1rem;
+    }
+
+    .group h3 {
+      margin-bottom: 0.5rem;
+      font-size: 1.2rem;
+    }
+
+    .photo-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .photo-list img {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      background-color: #103060;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+      margin-top: 1rem;
+    }
+
+    button:hover {
+      background-color: #1e1e1e;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Admin Directory for Photos</h1>
+  </header>
+
+  <main>
+
+    <!--Go back-->
+    <button onclick="location.href='/admin'">Main Page</button>
+
+
+    <h2>Login Codes</h2>
+    <ul class="directory">
+      <!-- Example list of login codes, will be populated dynamically -->
+      <li onclick="togglePanel('code1')">Login Code 1</li>
+      <li onclick="togglePanel('code2')">Login Code 2</li>
+      <li onclick="togglePanel('code3')">Login Code 3</li>
+      <!-- Add more login codes here -->
+    </ul>
+
+    <!-- Panel to show description and photos for each login code -->
+    <div id="code1" class="panel">
+      <h3>Description</h3>
+      <p>This is the description for Login Code 1.</p>
+      
+      <div class="group">
+        <h3>Group 1</h3>
+        <div class="photo-list">
+          <!-- Example photos for Group 1 -->
+          <img src="photo1.jpg" alt="Photo 1">
+          <img src="photo2.jpg" alt="Photo 2">
+        </div>
+      </div>
+
+      <div class="group">
+        <h3>Group 2</h3>
+        <div class="photo-list">
+          <!-- Example photos for Group 2 -->
+          <img src="photo3.jpg" alt="Photo 3">
+          <img src="photo4.jpg" alt="Photo 4">
+        </div>
+      </div>
+
+      <button onclick="downloadPhotos('code1')">Download All Photos</button>
+    </div>
+
+    <div id="code2" class="panel">
+      <h3>Description</h3>
+      <p>This is the description for Login Code 2.</p>
+
+      <div class="group">
+        <h3>Group 1</h3>
+        <div class="photo-list">
+          <!-- Example photos for Group 1 -->
+          <img src="photo5.jpg" alt="Photo 5">
+          <img src="photo6.jpg" alt="Photo 6">
+        </div>
+      </div>
+
+      <div class="group">
+        <h3>Group 2</h3>
+        <div class="photo-list">
+          <!-- Example photos for Group 2 -->
+          <img src="photo7.jpg" alt="Photo 7">
+          <img src="photo8.jpg" alt="Photo 8">
+        </div>
+      </div>
+
+      <button onclick="downloadPhotos('code2')">Download All Photos</button>
+    </div>
+
+    <div id="code3" class="panel">
+      <h3>Description</h3>
+      <p>This is the description for Login Code 3.</p>
+
+      <div class="group">
+        <h3>Group 1</h3>
+        <div class="photo-list">
+          <!-- Example photos for Group 1 -->
+          <img src="photo9.jpg" alt="Photo 9">
+          <img src="photo10.jpg" alt="Photo 10">
+        </div>
+      </div>
+
+      <div class="group">
+        <h3>Group 2</h3>
+        <div class="photo-list">
+          <!-- Example photos for Group 2 -->
+          <img src="photo11.jpg" alt="Photo 11">
+          <img src="photo12.jpg" alt="Photo 12">
+        </div>
+      </div>
+
+      <button onclick="downloadPhotos('code3')">Download All Photos</button>
+    </div>
+  </main>
+
+  <script>
+    // Function to toggle visibility of the panel when a login code is clicked
+    function togglePanel(code) {
+      const panel = document.getElementById(code);
+      const panels = document.querySelectorAll('.panel');
+      
+      // Close all other panels first
+      panels.forEach(p => p.style.display = 'none');
+
+      // Toggle the selected panel
+      panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+    }
+
+    // Example function to download photos for a specific login code
+    function downloadPhotos(code) {
+      alert(`Downloading all photos for ${code}`);
+      // Here you can implement logic for downloading the photos
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Photo Interaction</title>
+  <style>
+    body {
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #1e1e1e;
+    }
+
+    header {
+      background-color: #103060;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      border-bottom: 2px solid #103060;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .group {
+      margin-bottom: 2rem;
+    }
+
+    .photo-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .photo-list img {
+      width: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+      border: 4px solid transparent; /* Default border */
+    }
+
+    @media (hover: hover) {
+  .photo-list img:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+
+}
+
+    .liked {
+      border-color: #4CAF50; /* Green for liked */
+      box-shadow: 0 0 10px rgba(57, 230, 70, 0.8);
+    }
+
+    .loved {
+      border-color: #e63946; /* Red for loved */
+      box-shadow: 0 0 10px rgba(230, 57, 70, 0.8);
+    }
+
+    input[type="hidden"] {
+      display: none;
+    }
+
+    button {
+      background-color: #103060;
+      color: white;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: px;
+    }
+
+    button:hover {
+      background-color: #1e1e1e;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Photo Review</h1>
+  </header>
+
+  <main>
+    <!--Log In-->
+    <div id="login">
+        <h2>Log In</h2>
+        <form>
+            <label for="loginCode">Log In Code</label>
+            <input name="code" id="loginCode" style="width: 100%; height: 20px;">
+            <br>
+            <br>
+            <input type="submit" value="Log In" style="width: 100%; padding: 8px; background-color: #103060; border: none; color: white;">
+        </form>
+    </div>
+
+    <!--Info-->
+    <div id="information">
+        <h2>Information</h2>
+    </div>
+
+    <!--Self Scrutiny-->
+    <div id="selfscrutiny">
+        <h2>Interactive Section</h2>
+
+        <!-- Example for Group 1 -->
+        <div class="group" id="group1">
+        <h3>Group 1</h3>
+        <div class="photo-list">
+            <img src="photo1.jpg" alt="Photo 1" onclick="togglePhoto(this, 'group1')">
+            <img src="photo2.jpg" alt="Photo 2" onclick="togglePhoto(this, 'group1')">
+            <img src="photo3.jpg" alt="Photo 3" onclick="togglePhoto(this, 'group1')">
+        </div>
+        <!-- Hidden fields to store liked and loved photos -->
+        <input type="hidden" id="liked-group1" name="liked-group1" value="">
+        <input type="hidden" id="loved-group1" name="loved-group1" value="">
+        </div>
+
+        <!-- Example for Group 2 -->
+        <div class="group" id="group2">
+        <h3>Group 2</h3>
+        <div class="photo-list">
+            <img src="photo4.jpg" alt="Photo 4" onclick="togglePhoto(this, 'group2')">
+            <img src="photo5.jpg" alt="Photo 5" onclick="togglePhoto(this, 'group2')">
+            <img src="photo6.jpg" alt="Photo 6" onclick="togglePhoto(this, 'group2')">
+        </div>
+        <!-- Hidden fields to store liked and loved photos -->
+        <input type="hidden" id="liked-group2" name="liked-group2" value="">
+        <input type="hidden" id="loved-group2" name="loved-group2" value="">
+        </div>
+    </div>
+
+    <!--Review Stage-->
+    <div id="review">
+        <h2>Review Stage</h2>
+        <p>Please note that you can not see your photos in this stage, as they are being reviewed. They will be made available again if the admin goes back to self-scrutiny (where you can rate your photos), or when they have been finalised.</p>
+    </div>
+
+    <!--Final-->
+    <div id="final">
+        <h2>Final Section</h2>
+        <div class="group">
+        <h3>Group 1</h3>
+        <div class="photo-list">
+            <img src="photo1.jpg" alt="Photo 1">
+            <img src="photo2.jpg" alt="Photo 2">
+            <img src="photo3.jpg" alt="Photo 3">
+        </div>
+        <button onclick="downloadPhotos('group1')">Download All Photos</button>
+        </div>
+
+        <div class="group">
+        <h3>Group 2</h3>
+        <div class="photo-list">
+            <img src="photo4.jpg" alt="Photo 4">
+            <img src="photo5.jpg" alt="Photo 5">
+            <img src="photo6.jpg" alt="Photo 6">
+        </div>
+        <button onclick="downloadPhotos('group2')">Download All Photos</button>
+        </div>
+    </div>
+  </main>
+
+  <script>
+    function togglePhoto(photo, group) {
+      const likedInput = document.getElementById(`liked-${group}`);
+      const lovedInput = document.getElementById(`loved-${group}`);
+      const likedPhotos = new Set(likedInput.value ? likedInput.value.split(',') : []);
+      let lovedPhoto = lovedInput.value;
+
+      // Toggle photo states
+      if (photo.classList.contains('liked')) {
+        // Move from "liked" to "loved"
+        photo.classList.remove('liked');
+        photo.classList.add('loved');
+        likedPhotos.delete(photo.src);
+        lovedPhoto = photo.src; // Only one loved photo is allowed
+      } else if (photo.classList.contains('loved')) {
+        // Remove from "loved"
+        photo.classList.remove('loved');
+        lovedPhoto = '';
+      } else {
+        // Add as "liked"
+        photo.classList.add('liked');
+        likedPhotos.add(photo.src);
+      }
+
+      // Update hidden input fields
+      likedInput.value = Array.from(likedPhotos).join(',');
+      lovedInput.value = lovedPhoto;
+
+      // Ensure only one photo is loved
+      if (lovedPhoto) {
+        document.querySelectorAll(`#${group} .photo-list img`).forEach((img) => {
+          if (img.src !== lovedPhoto) img.classList.remove('loved');
+        });
+      }
+    }
+  </script>
+</body>
+</html>

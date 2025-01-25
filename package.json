@@ -1,0 +1,23 @@
+{
+  "name": "photo-selector",
+  "version": "1.0.0",
+  "description": "An app to select photos from a group of photos, for models and people to approve their own photos",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/premraghvani/photo-selector.git"
+  },
+  "author": "Prem Raghvani",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/premraghvani/photo-selector/issues"
+  },
+  "homepage": "https://github.com/premraghvani/photo-selector#readme",
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

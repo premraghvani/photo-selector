@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal</title>
+  <style>
+    body {
+      font-family: Verdana, Geneva, Tahoma, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #1e1e1e;
+    }
+
+    header {
+      background-color: #103060;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    main {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    section {
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      border-bottom: 2px solid #103060;
+      padding-bottom: 0.5rem;
+    }
+
+    label {
+      display: block;
+      margin-top: 0.5rem;
+    }
+
+    input, select, textarea {
+      width: calc(100% - 16px);
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #103060;
+      color: white;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: px;
+    }
+
+    button:hover {
+      background-color: #1e1e1e;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Admin Portal</h1>
+  </header>
+  <main>
+    <!-- Section: Create Log In Code-->
+    <section id="logincode-section">
+        <h2>Issue Log In Code</h2>
+        <form id="issueForm">
+  
+          <label for="loginCode1">Login Code:</label>
+          <input type="text" id="loginCode1" required />
+  
+          <label for="description">Description (optional):</label>
+          <textarea id="description" rows="3"></textarea>
+
+          <button type="submit">Create</button>
+        </form>
+      </section>
+
+    <!-- Section: Upload Images -->
+    <section id="upload-section">
+      <h2>Upload Images</h2>
+      <form id="uploadForm">
+        <label for="loginCode2">Login Code:</label>
+        <input type="text" id="loginCode2" required />
+
+        <label for="group">Grouping Name (optional, defaults to "main"):</label>
+        <input type="text" id="group" />
+
+        <label for="images">Upload Images:</label>
+        <input type="file" id="images" multiple required accept=".jpg"/>
+
+        <button type="submit">Upload</button>
+      </form>
+    </section>
+
+    <!-- Section: Set Mode -->
+    <section id="mode-section">
+      <h2>Set Mode</h2>
+      <form id="modeForm">
+        <label for="mode">Choose Mode:</label>
+        <select id="mode" name="mode" required>
+          <option value="self-scrutiny">Self Scrutiny</option>
+          <option value="review">Review</option>
+          <option value="final">Final</option>
+        </select>
+        <button type="submit">Set Mode</button>
+      </form>
+    </section>
+
+    <!-- Section: Review Photos -->
+    <section id="review-section">
+      <h2>Review Photos</h2>
+      <button id="loadPhotos" onclick="location.href='/admin/review'">Load</button>
+    </section>
+  </main>
+
+  <script>
+    // event listener for issuance
+    document.getElementById('issueForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      try {
+        const response = await fetch('/admin/codes/issue', {
+          method: 'POST',
+          body: JSON.stringify({
+            code:document.getElementById("loginCode1").value,
+            description:document.getElementById("description").value
+          }),
+        });
+        const data = await response.json();
+        alert(data.message);
+      } catch (error) {
+        console.error('Error uploading images:', error);
+      }
+    });
+
+    // Event listener for uploading images
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      let files = document.getElementById("images").files;
+
+      for(var i = 0; i < files.length; i++){
+        try {
+          let fileData = await files[i].arrayBuffer();
+          const response = await fetch('/admin/images/upload',{
+            method: 'POST',
+            body: JSON.stringify({
+              code:document.getElementById("loginCode2").value,
+              group:document.getElementById("group").value,
+              file:arrayBufferToBase64(fileData),
+              fileName:files[i].name
+            }),
+          });
+          const data = await response.json();
+          if(i == files.length-1){
+            alert(data.message)
+          }
+        } catch (error) {
+          console.error('Error uploading images:', error);
+        }
+      }
+    });
+
+    // Event listener for setting mode
+    document.getElementById('modeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const mode = document.getElementById('mode').value;
+
+      try {
+        const response = await fetch('/admin/mode', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode }),
+        });
+        const data = await response.json();
+        alert(data.message);
+      } catch (error) {
+        console.error('Error setting mode:', error);
+      }
+    });
+
+    // Event listener for loading preferred photos
+    document.getElementById('loadPhotos').addEventListener('click', async () => {
+      try {
+        const response = await fetch('/admin/review');
+        const data = await response.json();
+
+        if (data.success) {
+          const tableBody = document.querySelector('#photosTable tbody');
+          tableBody.innerHTML = '';
+
+          data.results.forEach((result) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${result.groupName}</td>
+              <td>${result.loginCode}</td>
+              <td>${Object.values(result.preferred).join(', ') || 'None'}</td>
+              <td><button onclick="confirmPhotos('${result.loginCode}')">Confirm</button></td>
+            `;
+            tableBody.appendChild(row);
+          });
+        } else {
+          alert(data.message);
+        }
+      } catch (error) {
+        console.error('Error loading photos:', error);
+      }
+    });
+
+    // Function to confirm photos (example)
+    function confirmPhotos(loginCode) {
+      alert(`Confirming photos for login code: ${loginCode}`);
+      // Add functionality to confirm photos
+    }
+
+    function arrayBufferToBase64(buffer) {
+  let binary = '';
+  const bytes = new Uint8Array(buffer); // Create a byte array
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary); // Convert binary string to Base64
+}
+  </script>
+</body>
+</html>
