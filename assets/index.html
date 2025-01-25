@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Photo Interaction</title>
+  <title>User Photos</title>
   <style>
     body {
       font-family: Verdana, Geneva, Tahoma, sans-serif;
@@ -55,20 +55,18 @@
     }
 
     @media (hover: hover) {
-  .photo-list img:hover {
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  }
+      .photo-list img:hover {
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      }
 
 }
 
     .liked {
-      border-color: #4CAF50; /* Green for liked */
-      box-shadow: 0 0 10px rgba(57, 230, 70, 0.8);
+      box-shadow: 0 0 25px rgba(6, 192, 6, 0.8);
     }
 
     .loved {
-      border-color: #e63946; /* Red for loved */
-      box-shadow: 0 0 10px rgba(230, 57, 70, 0.8);
+      box-shadow: 0 0 25px rgba(192, 6, 6, 0.8);
     }
 
     input[type="hidden"] {
@@ -112,51 +110,28 @@
     </div>
 
     <!--Info-->
-    <div id="information">
+    <div id="information" style="display: none;">
         <h2>Information</h2>
+        <div id="informationElaboration"></div>
     </div>
 
     <!--Self Scrutiny-->
-    <div id="selfscrutiny">
-        <h2>Interactive Section</h2>
-
-        <!-- Example for Group 1 -->
-        <div class="group" id="group1">
-        <h3>Group 1</h3>
-        <div class="photo-list">
-            <img src="photo1.jpg" alt="Photo 1" onclick="togglePhoto(this, 'group1')">
-            <img src="photo2.jpg" alt="Photo 2" onclick="togglePhoto(this, 'group1')">
-            <img src="photo3.jpg" alt="Photo 3" onclick="togglePhoto(this, 'group1')">
-        </div>
-        <!-- Hidden fields to store liked and loved photos -->
-        <input type="hidden" id="liked-group1" name="liked-group1" value="">
-        <input type="hidden" id="loved-group1" name="loved-group1" value="">
-        </div>
-
-        <!-- Example for Group 2 -->
-        <div class="group" id="group2">
-        <h3>Group 2</h3>
-        <div class="photo-list">
-            <img src="photo4.jpg" alt="Photo 4" onclick="togglePhoto(this, 'group2')">
-            <img src="photo5.jpg" alt="Photo 5" onclick="togglePhoto(this, 'group2')">
-            <img src="photo6.jpg" alt="Photo 6" onclick="togglePhoto(this, 'group2')">
-        </div>
-        <!-- Hidden fields to store liked and loved photos -->
-        <input type="hidden" id="liked-group2" name="liked-group2" value="">
-        <input type="hidden" id="loved-group2" name="loved-group2" value="">
-        </div>
+    <div id="selfscrutiny" style="display: none;">
+        <h2>Self Scrutiny</h2>
+        <p>In this section, you can click on the photos you approve, and if a green box shows around it, it will be approved. If you double click the photo, it will be your favourite photo, and a red box will show around it. Note that you can have exactly one favourite per group, <b>Please pick one favourite per group</b>. If you want to un-like a photo, keep clicking until there isn't a green or red box around it. After you are done, scroll down and click submit.</p>
+        <div id="selfScrutinyContent"></div>
     </div>
 
     <!--Review Stage-->
-    <div id="review">
+    <div id="review" style="display: none;">
         <h2>Review Stage</h2>
         <p>Please note that you can not see your photos in this stage, as they are being reviewed. They will be made available again if the admin goes back to self-scrutiny (where you can rate your photos), or when they have been finalised.</p>
     </div>
 
     <!--Final-->
-    <div id="final">
+    <div id="final" style="display: none;">
         <h2>Final Section</h2>
-        <div class="group">
+        <!---<div class="group">
         <h3>Group 1</h3>
         <div class="photo-list">
             <img src="photo1.jpg" alt="Photo 1">
@@ -174,14 +149,110 @@
             <img src="photo6.jpg" alt="Photo 6">
         </div>
         <button onclick="downloadPhotos('group2')">Download All Photos</button>
-        </div>
+        </div>--->
     </div>
   </main>
 
   <script>
+    window.onload = async function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+      
+      if (code) {
+        // checks the code info
+        try {
+          const response = await fetch(`/code/info?code=${code}`);
+          const data = await response.json();
+          checkCode(data);
+        } catch(err){
+          console.error(err);
+        }
+      }
+    };
+
+    let currentSession = {};
+
+    function checkCode(data){
+      if(!!data.id){
+        currentSession = data;
+
+        // first considers the program stage when hiding stuff
+        document.getElementById("login").style.display = "none";
+        document.getElementById("information").style.display = "block";
+        if(data.programStage == "selfScrutiny"){
+          document.getElementById("selfscrutiny").style.display = "block";
+        } else if(data.programStage == "review"){
+          document.getElementById("review").style.display = "block";
+        } else if(data.programStage == "final"){
+          document.getElementById("final").style.display = "block";
+        }
+
+        // now, does actions for info and the blocks, first: info
+        document.getElementById("informationElaboration").innerHTML = `<p>Code: <b>${data.id}</b><br>Description: <b>${data.description}</b></p><p style="font-size: 8px; color: gray;">Status Codes: ${data.status.join("; ")}</p>`
+      
+        // adds info for self scrutiny
+        if(data.programStage == "selfScrutiny"){
+          let selfScrutinyContent = "";
+          let groups = Object.keys(data.photos);
+          for(var i = 0; i < groups.length; i++){
+            let currGroup = groups[i];
+            selfScrutinyContent += `<div class="group" id="group_${currGroup}"><h3>${currGroup}</h3>`;
+              if(data.preferences[currGroup].length != 0 || data.loves[currGroup] != ""){
+                selfScrutinyContent += `<p style="color:red">You have already liked / loved photos in this group. If you like or love any photos in this group, it will overwrite what has already been done.</p>`
+              }
+            selfScrutinyContent += `<div class="photo-list">`;
+              for(var ii = 0; ii < data.photos[groups].length; ii++){
+                let currPhoto = data.photos[groups][ii];
+                selfScrutinyContent += `<img src="/image/fetch?id=${data.id}-${currGroup}-${currPhoto}" alt="${currGroup}/${currPhoto}" onclick="togglePhoto(this, '${currGroup}')">`
+              }
+            selfScrutinyContent += `</div><input type="hidden" id="liked_${currGroup}" name="liked_${currGroup}" value=""><input type="hidden" id="loved_${currGroup}" name="loved_${currGroup}" value=""></div>`;
+          }
+
+          selfScrutinyContent += `<button onclick="selfScrutinySubmit()">Submit Preferences</button>`;
+          document.getElementById("selfScrutinyContent").innerHTML = selfScrutinyContent;
+        }
+      }
+    }
+
+
+    // submits self scrutiny
+    async function selfScrutinySubmit(){
+      let dataToSend = {id:currentSession.id,likes:{},love:{}};
+      let groups = Object.keys(currentSession.photos);
+      for(var i = 0; i < groups.length; i++){
+        let group = groups[i];
+        let likes = document.getElementById(`liked_${group}`).value; let love = document.getElementById(`loved_${group}`).value;
+        if(!!likes){
+          dataToSend.likes[group] = []
+          let likeArr = likes.split(",");
+          for(var ii = 0; ii < likeArr.length; ii++){
+            let tmp1 = likeArr[ii].split("?");
+            dataToSend.likes[group].push(filterData(tmp1[1]));
+          }
+        }
+        if(!!love){
+          let tmp1 = love.split("?");
+          dataToSend.love[group] = filterData(tmp1[1]);
+        }
+      }
+
+      // sends the data
+      try {
+        const resp = await fetch("/preferences/submit",{
+          method:"POST",
+          body:JSON.stringify(dataToSend)
+        })
+        const result = await resp.json();
+        alert(result.message)
+      } catch(err) {
+        console.error(err)
+      }
+    }
+
+    // toggles photos in self scrutiny
     function togglePhoto(photo, group) {
-      const likedInput = document.getElementById(`liked-${group}`);
-      const lovedInput = document.getElementById(`loved-${group}`);
+      const likedInput = document.getElementById(`liked_${group}`);
+      const lovedInput = document.getElementById(`loved_${group}`);
       const likedPhotos = new Set(likedInput.value ? likedInput.value.split(',') : []);
       let lovedPhoto = lovedInput.value;
 
@@ -208,11 +279,23 @@
 
       // Ensure only one photo is loved
       if (lovedPhoto) {
-        document.querySelectorAll(`#${group} .photo-list img`).forEach((img) => {
+        document.querySelectorAll(`#group_${group} .photo-list img`).forEach((img) => {
           if (img.src !== lovedPhoto) img.classList.remove('loved');
         });
       }
     }
+
+    function filterData(queryString){
+    let qsSplit = queryString.split("&");
+    for(var i = 0; i < qsSplit.length; i++){
+        let tmp = qsSplit[i].split("=");
+        if(tmp[0] == "id"){
+            let tmp1 = tmp[1].split("-")
+            return tmp1[2];
+        }
+    }
+    return "";
+}
   </script>
 </body>
 </html>

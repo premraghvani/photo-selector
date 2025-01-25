@@ -8,7 +8,7 @@ module.exports = {
     const { mode } = req.body;
 
     // Validate mode
-    const validModes = ["self-scrutiny", "review", "final"];
+    const validModes = ["selfScrutiny", "review", "final"];
     if (!validModes.includes(mode)) {
       res.status(400).json({ success: false, message: "Invalid mode!" });
       return;
