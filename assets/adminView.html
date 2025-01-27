@@ -116,6 +116,14 @@
   z-index: 1000;
   position: relative;
 }
+
+.liked {
+      box-shadow: 0 0 25px rgba(6, 192, 6, 0.8);
+    }
+
+    .loved {
+      box-shadow: 0 0 25px rgba(192, 6, 6, 0.8);
+    }
   </style>
 </head>
 <body>
@@ -194,8 +202,11 @@
         let currGroup = groups[i];
         content += `<div class="group" id="group_${currGroup}"><h3>${currGroup}</h3><div class="photo-list">`;
         for(var ii = 0; ii < data.photos[currGroup].length; ii++){
+          let className = "";
           let currPhoto = data.photos[currGroup][ii];
-          content += `<img src="/image/fetch?id=${data.id}-${currGroup}-${currPhoto}" alt="${currGroup}/${currPhoto}" id="img_${currGroup}_${currPhoto}" onclick="expandImage('img_${currGroup}_${currPhoto}')">`
+          if(data.preferences[currGroup].includes(currPhoto)){className="liked"}
+          if(data.loves[currGroup] == currPhoto){className = "loved"}
+          content += `<img src="/image/fetch?id=${data.id}-${currGroup}-${currPhoto}" alt="${currGroup}/${currPhoto}" id="img_${currGroup}_${currPhoto}" onclick="expandImage('img_${currGroup}_${currPhoto}')" class="${className}">`
         }
         content += `</div>`;
       }
