@@ -84,8 +84,7 @@
     }
 
     .photo-list img {
-      width: 150px;
-      height: 150px;
+      width: 500px;
       object-fit: cover;
       border-radius: 8px;
     }
@@ -103,6 +102,20 @@
     button:hover {
       background-color: #1e1e1e;
     }
+
+    .expandable-image {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+.expandable-image.expanded {
+  transform: scale(1.5);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  position: relative;
+}
   </style>
 </head>
 <body>
@@ -117,109 +130,101 @@
 
 
     <h2>Login Codes</h2>
-    <ul class="directory">
-      <!-- Example list of login codes, will be populated dynamically -->
-      <li onclick="togglePanel('code1')">Login Code 1</li>
-      <li onclick="togglePanel('code2')">Login Code 2</li>
-      <li onclick="togglePanel('code3')">Login Code 3</li>
-      <!-- Add more login codes here -->
+    <ul class="directory" id="directory">
     </ul>
 
     <!-- Panel to show description and photos for each login code -->
-    <div id="code1" class="panel">
+    <div id="codeview" class="panel">
+      <h2 id="codeId"></h2>
       <h3>Description</h3>
-      <p>This is the description for Login Code 1.</p>
-      
-      <div class="group">
-        <h3>Group 1</h3>
-        <div class="photo-list">
-          <!-- Example photos for Group 1 -->
-          <img src="photo1.jpg" alt="Photo 1">
-          <img src="photo2.jpg" alt="Photo 2">
-        </div>
+      <p id="description"></p>
+      <p style="font-size: 8px; color: gray;" id="status"></p>
+      <div id="content">
+
       </div>
-
-      <div class="group">
-        <h3>Group 2</h3>
-        <div class="photo-list">
-          <!-- Example photos for Group 2 -->
-          <img src="photo3.jpg" alt="Photo 3">
-          <img src="photo4.jpg" alt="Photo 4">
-        </div>
-      </div>
-
-      <button onclick="downloadPhotos('code1')">Download All Photos</button>
-    </div>
-
-    <div id="code2" class="panel">
-      <h3>Description</h3>
-      <p>This is the description for Login Code 2.</p>
-
-      <div class="group">
-        <h3>Group 1</h3>
-        <div class="photo-list">
-          <!-- Example photos for Group 1 -->
-          <img src="photo5.jpg" alt="Photo 5">
-          <img src="photo6.jpg" alt="Photo 6">
-        </div>
-      </div>
-
-      <div class="group">
-        <h3>Group 2</h3>
-        <div class="photo-list">
-          <!-- Example photos for Group 2 -->
-          <img src="photo7.jpg" alt="Photo 7">
-          <img src="photo8.jpg" alt="Photo 8">
-        </div>
-      </div>
-
-      <button onclick="downloadPhotos('code2')">Download All Photos</button>
-    </div>
-
-    <div id="code3" class="panel">
-      <h3>Description</h3>
-      <p>This is the description for Login Code 3.</p>
-
-      <div class="group">
-        <h3>Group 1</h3>
-        <div class="photo-list">
-          <!-- Example photos for Group 1 -->
-          <img src="photo9.jpg" alt="Photo 9">
-          <img src="photo10.jpg" alt="Photo 10">
-        </div>
-      </div>
-
-      <div class="group">
-        <h3>Group 2</h3>
-        <div class="photo-list">
-          <!-- Example photos for Group 2 -->
-          <img src="photo11.jpg" alt="Photo 11">
-          <img src="photo12.jpg" alt="Photo 12">
-        </div>
-      </div>
-
-      <button onclick="downloadPhotos('code3')">Download All Photos</button>
     </div>
   </main>
 
   <script>
+    // onload
+    window.onload = async () => {
+      await fetchCodes();
+    };
+
+    // fetches the codes
+    async function fetchCodes(){
+      let items = "";
+
+      try {
+        const resp = await fetch("/admin/codes/list",{
+          method:"GET",
+        })
+        const result = await resp.json();
+        for(var i = 0; i < result.length; i++){
+          items += `<li onclick="togglePanel('${result[i]}')">${result[i]}</li>`
+        }
+      } catch(err) {
+        console.error(err)
+      }
+
+      document.getElementById("directory").innerHTML = items;
+    }
+
     // Function to toggle visibility of the panel when a login code is clicked
-    function togglePanel(code) {
-      const panel = document.getElementById(code);
-      const panels = document.querySelectorAll('.panel');
-      
-      // Close all other panels first
-      panels.forEach(p => p.style.display = 'none');
+    async function togglePanel(code) {
+      const panel = document.getElementById("codeview");
+      panel.style.display = "block";
 
-      // Toggle the selected panel
-      panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+      // checks the code info
+      let data = {};
+      try {
+        const response = await fetch(`/code/info?code=${code}`);
+        data = await response.json();
+      } catch(err){
+        console.error(err);
+      }
+
+      document.getElementById("codeId").innerHTML = data.id;
+      document.getElementById("description").innerHTML = data.description
+      document.getElementById("status").innerHTML = `Status Codes: ${data.status.join("; ")}`;
+
+      let content = "";
+      let groups = Object.keys(data.photos)
+      for(var i = 0; i < groups.length; i++){
+        let currGroup = groups[i];
+        content += `<div class="group" id="group_${currGroup}"><h3>${currGroup}</h3><div class="photo-list">`;
+        for(var ii = 0; ii < data.photos[currGroup].length; ii++){
+          let currPhoto = data.photos[currGroup][ii];
+          content += `<img src="/image/fetch?id=${data.id}-${currGroup}-${currPhoto}" alt="${currGroup}/${currPhoto}" id="img_${currGroup}_${currPhoto}" onclick="expandImage('img_${currGroup}_${currPhoto}')">`
+        }
+        content += `</div>`;
+      }
+      document.getElementById("content").innerHTML = content;
     }
 
-    // Example function to download photos for a specific login code
-    function downloadPhotos(code) {
-      alert(`Downloading all photos for ${code}`);
-      // Here you can implement logic for downloading the photos
+    // image expansion
+    function expandImage(id) {
+  const image = document.getElementById(id);
+  if (image) {
+    const isExpanded = image.style.transform === 'scale(2.5)';
+    if (isExpanded) {
+      image.style.transform = '';
+      image.style.boxShadow = '';
+      image.style.zIndex = '';
+      image.style.position = '';
+      document.body.style.overflow = '';
+    } else {
+      image.style.transform = 'scale(2.5)';
+      image.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.3)';
+      image.style.zIndex = '1000';
+      image.style.position = 'relative';
+      document.body.style.overflow = 'hidden';
     }
+  } else {
+    console.error(`Image with ID '${id}' not found.`);
+  }
+}
+    
   </script>
 </body>
 </html>
