@@ -37,6 +37,9 @@ module.exports = {
     let loveGroups = Object.keys(body.love);
     for(var i = 0; i < loveGroups.length; i++){
         let item = body.love[loveGroups[i]];
+        if(!body.likes[loveGroups[i]]){
+            body.likes[loveGroups[i]] = []
+        }
         if(body.likes[loveGroups[i]].includes(item) == false){
             body.likes[loveGroups[i]].push(item);
         }

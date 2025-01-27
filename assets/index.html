@@ -201,8 +201,8 @@
                 selfScrutinyContent += `<p style="color:red">You have already liked / loved photos in this group. If you like or love any photos in this group, it will overwrite what has already been done.</p>`
               }
             selfScrutinyContent += `<div class="photo-list">`;
-              for(var ii = 0; ii < data.photos[groups].length; ii++){
-                let currPhoto = data.photos[groups][ii];
+              for(var ii = 0; ii < data.photos[currGroup].length; ii++){
+                let currPhoto = data.photos[currGroup][ii];
                 selfScrutinyContent += `<img src="/image/fetch?id=${data.id}-${currGroup}-${currPhoto}" alt="${currGroup}/${currPhoto}" onclick="togglePhoto(this, '${currGroup}')">`
               }
             selfScrutinyContent += `</div><input type="hidden" id="liked_${currGroup}" name="liked_${currGroup}" value=""><input type="hidden" id="loved_${currGroup}" name="loved_${currGroup}" value=""></div>`;

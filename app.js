@@ -4,8 +4,8 @@ const fs = require("fs");
 
 // configures the app
 const app = express();
-app.use(express.raw({ type: "*/*", limit: "10mb" }));
-app.use(express.json());
+app.use(express.raw({ type: "*/*", limit: "25mb" }));
+app.use(express.json({ limit: "50mb" }));
 
 // loads up a reference to all commands
 const modules = fs
