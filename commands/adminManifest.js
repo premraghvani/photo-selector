@@ -33,7 +33,7 @@ module.exports = {
       groups.forEach(group=>{
         let preferences = file.preferences[group];
         let loves = file.loves[group];
-        if(preferences.includes(loves) == false && (loves != undefined || loves != "")){
+        if(preferences.includes(loves) == false && (loves != undefined && loves != "")){
           preferences.push(loves)
         }
         // missing manifest
