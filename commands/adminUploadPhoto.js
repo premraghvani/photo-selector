@@ -1,7 +1,7 @@
 const fs = require("fs");
 const {getFormattedTimestamp} = require("../commonFunctions")
 
-// Admin portal for setting the current mode
+// Admin portal to upload an image
 module.exports = {
   page: "/admin/images/upload",
   method: "POST",
@@ -54,7 +54,7 @@ module.exports = {
       body.fileName = tmpFilename;
 
       // accepts file for upload
-      const buffer = Buffer.from(body.file, 'base64');
+      const buffer = Buffer.from(body.file, "base64");
       fs.writeFileSync(`./database/images/${loginCodeInfo.id}-${body.group}-${body.fileName}`,buffer);
       loginCodeInfo.photos[body.group].push(body.fileName);
       loginCodeInfo.status.push(`UP ${body.group} ${body.fileName} ${getFormattedTimestamp()}`)

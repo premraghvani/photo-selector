@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-// Admin portal for setting the current mode
+// Admin API to get all codes
 module.exports = {
   page: "/admin/codes/list",
   method: "GET",

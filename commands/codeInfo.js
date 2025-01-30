@@ -23,7 +23,8 @@ module.exports = {
         res.status(404).json({});
     } else {
         let info = JSON.parse(fs.readFileSync(fileLocation).toString());
-        info.programStage = "selfScrutiny"
+        let mode = JSON.parse(fs.readFileSync("./database/mode.json").toString());
+        info.programStage = mode.mode;
         res.set(200).json(info)
     }
     return;

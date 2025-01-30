@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-// simply serves the front html page
+// simply serves a photo
 module.exports = {
   page: "/image/fetch",
   method: "GET",

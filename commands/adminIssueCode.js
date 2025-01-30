@@ -1,7 +1,7 @@
 const fs = require("fs");
 const {getFormattedTimestamp} = require("../commonFunctions")
 
-// Admin portal for setting the current mode
+// Admin API to issue a new code
 module.exports = {
   page: "/admin/codes/issue",
   method: "POST",

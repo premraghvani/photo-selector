@@ -1,16 +1,22 @@
 const fs = require("fs");
 
-// Admin portal for setting the current mode
+// Admin API to set current mode
 module.exports = {
   page: "/admin/mode",
   method: "POST",
   execute: async (req, res) => {
-    const { mode } = req.body;
+    let body;
+    try {
+      body = JSON.parse(req.body.toString());
+    } catch (err) {
+      body = {};
+    }
+    const { mode } = body;
 
     // Validate mode
-    const validModes = ["selfScrutiny", "review", "final"];
+    const validModes = ["selfScrutiny", "review"];
     if (!validModes.includes(mode)) {
-      res.status(400).json({ success: false, message: "Invalid mode!" });
+      res.status(400).json({ success: false, message: "Invalid mode" });
       return;
     }
 
