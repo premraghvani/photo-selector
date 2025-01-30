@@ -33,7 +33,7 @@ module.exports = {
       groups.forEach(group=>{
         let preferences = file.preferences[group];
         let loves = file.loves[group];
-        if(preferences.includes(loves) == false){
+        if(preferences.includes(loves) == false && (loves != undefined || loves != "")){
           preferences.push(loves)
         }
         // missing manifest
@@ -76,9 +76,9 @@ module.exports = {
       // constructs a csv, first up: missing manifest
       let content = "PART 1: MISSING MANIFEST\nid,group,likesMissed,lovesMissed,description"
       missingManifest.forEach(missing=>{
-        let loveMiss = "";
-        if(missing.loves){loveMiss = "X"};
-        content += `\n${missing.id},${missing.group},X,${loveMiss},${metadataManifest[missing.id]}`
+        let likeMiss = "";
+        if(missing.likes){likeMiss = "X"};
+        content += `\n${missing.id},${missing.group},${likeMiss},X,${metadataManifest[missing.id]}`
       });
       
       // next up: for images
